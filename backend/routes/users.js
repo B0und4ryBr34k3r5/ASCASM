@@ -1,5 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import { verifyToken, verifyAdmin } from "../middleware/auth.js";
 
 const router = express.Router()
 
@@ -27,8 +29,8 @@ router.get("/allmembers", async (req,res)=>{
 })
 
 /* Update user by id */
-router.put("/updateuser/:id", async (req, res) => {
-    if (req.body.userId === req.params.id || req.body.isAdmin) {
+router.put("/updateuser/:id", verifyToken, async (req, res) => {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
         if (req.body.password) {
             try {
                 const salt = await bcrypt.genSalt(10);
@@ -52,43 +54,33 @@ router.put("/updateuser/:id", async (req, res) => {
 })
 
 /* Adding transaction to active transactions list */
-router.put("/:id/move-to-activetransactions" , async (req,res)=>{
-    if(req.body.isAdmin){
-        try{
-            const user = await User.findById(req.body.userId);
-            await user.updateOne({$push:{activeTransactions:req.params.id}})
-            res.status(200).json("Added to Active Transaction")
-        }
-        catch(err){
-            res.status(500).json(err)
-        }
+router.put("/:id/move-to-activetransactions", verifyAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.body.userId);
+        await user.updateOne({ $push: { activeTransactions: req.params.id } })
+        res.status(200).json("Added to Active Transaction")
     }
-    else{
-        res.status(403).json("Only Admin can add a transaction")
+    catch (err) {
+        res.status(500).json(err)
     }
 })
 
 /* Adding transaction to previous transactions list and removing from active transactions list */
-router.put("/:id/move-to-prevtransactions", async (req,res)=>{
-    if(req.body.isAdmin){
-        try{
-            const user = await User.findById(req.body.userId);
-            await user.updateOne({$pull:{activeTransactions:req.params.id}})
-            await user.updateOne({$push:{prevTransactions:req.params.id}})
-            res.status(200).json("Added to Prev transaction Transaction")
-        }
-        catch(err){
-            res.status(500).json(err)
-        }
+router.put("/:id/move-to-prevtransactions", verifyAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.body.userId);
+        await user.updateOne({ $pull: { activeTransactions: req.params.id } })
+        await user.updateOne({ $push: { prevTransactions: req.params.id } })
+        res.status(200).json("Added to Prev transaction Transaction")
     }
-    else{
-        res.status(403).json("Only Admin can do this")
+    catch (err) {
+        res.status(500).json(err)
     }
 })
 
 /* Delete user by id */
-router.delete("/deleteuser/:id", async (req, res) => {
-    if (req.body.userId === req.params.id || req.body.isAdmin) {
+router.delete("/deleteuser/:id", verifyToken, async (req, res) => {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
         try {
             await User.findByIdAndDelete(req.params.id);
             res.status(200).json("Account has been deleted");

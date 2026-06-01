@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.post("/register", async (req, res) => {
       mobileNumber: req.body.mobileNumber,
       email: req.body.email,
       password: hashedPass,
-      isAdmin: req.body.isAdmin,
+      isAdmin: false,
     });
 
     /* Save User and Return */
@@ -49,12 +50,20 @@ router.post("/signin", async (req, res) => {
 
     console.log(user, "user");
 
-    !user && res.status(404).json("User not found");
+    if (!user) {
+      return res.status(404).json("User not found");
+    }
 
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    !validPass && res.status(400).json("Wrong Password");
+    if (!validPass) {
+      return res.status(400).json("Wrong Password");
+    }
 
-    res.status(200).json(user);
+    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET || "default_secret", {
+      expiresIn: "24h",
+    });
+
+    res.status(200).json({ user, token });
   } catch (err) {
     console.log(err);
   }

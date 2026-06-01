@@ -49,8 +49,7 @@ function AddBook() {
             bookCountAvailable: bookCountAvailable,
             language: language,
             publisher: publisher,
-            categories: selectedCategories,
-            isAdmin: user.isAdmin
+            categories: selectedCategories
         }
         try {
             const response = await axios.post(API_URL + "api/books/addbook", BookData)

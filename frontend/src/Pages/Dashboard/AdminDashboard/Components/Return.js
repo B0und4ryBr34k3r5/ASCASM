@@ -59,7 +59,7 @@ function Return() {
         try{
             /* Setting return date and transactionStatus to completed */
             await axios.put(API_URL+"api/transactions/update-transaction/"+transactionId,{
-                isAdmin:user.isAdmin,
+                
                 transactionStatus:"Completed",
                 returnDate:moment(new Date()).format("MM/DD/YYYY")
             })
@@ -71,27 +71,24 @@ function Return() {
             /* If the number of days after dueDate is greater than zero then decreasing points by 10 else increase by 10*/
             if(due > 0){
                 await axios.put(API_URL+"api/users/updateuser/"+borrowerId,{
-                    points:points-10,
-                    isAdmin: user.isAdmin
+                    points:points-10
                 })
             }
             else if(due<=0){
                 await axios.put(API_URL+"api/users/updateuser/"+borrowerId,{
-                    points:points+10,
-                    isAdmin: user.isAdmin
+                    points:points+10
                 })
             }
 
             const book_details = await axios.get(API_URL+"api/books/getbook/"+bookId)
             await axios.put(API_URL+"api/books/updatebook/"+bookId,{
-                isAdmin:user.isAdmin,
+                
                 bookCountAvailable:book_details.data.bookCountAvailable + 1
             })
 
             /* Pulling out the transaction id from user active Transactions and pushing to Prev Transactions */
             await axios.put(API_URL + `api/users/${transactionId}/move-to-prevtransactions`, {
-                userId: borrowerId,
-                isAdmin: user.isAdmin
+                userId: borrowerId
             })
 
             setExecutionStatus("Completed");
@@ -105,8 +102,7 @@ function Return() {
     const convertToIssue = async (transactionId) => {
         try{
             await axios.put(API_URL+"api/transactions/update-transaction/"+transactionId,{
-                transactionType:"Issued",
-                isAdmin:user.isAdmin
+                transactionType:"Issued"
             })
             setExecutionStatus("Completed");
             alert("Book issued succesfully 🎆")

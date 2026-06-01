@@ -50,8 +50,7 @@ function AddTransaction() {
                     bookName: book_details.data.bookName,
                     transactionType: transactionType,
                     fromDate: fromDateString,
-                    toDate: toDateString,
-                    isAdmin: user.isAdmin
+                    toDate: toDateString
                 }
                 try {
                     const response = await axios.post(API_URL + "api/transactions/add-transaction", transactionData)
@@ -59,12 +58,11 @@ function AddTransaction() {
                         (recentTransactions.splice(-1))
                     }
                     await axios.put(API_URL + `api/users/${response.data._id}/move-to-activetransactions`, {
-                        userId: borrowerId,
-                        isAdmin: user.isAdmin
+                        userId: borrowerId
                     })
 
                     await axios.put(API_URL+"api/books/updatebook/"+bookId,{
-                        isAdmin:user.isAdmin,
+                        
                         bookCountAvailable:book_details.data.bookCountAvailable - 1
                     })
 
