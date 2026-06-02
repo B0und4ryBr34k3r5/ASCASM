@@ -18,10 +18,14 @@ router.get("/getuser/:id", async (req, res) => {
 })
 
 /* Getting all members in the library */
-router.get("/allmembers", async (req,res)=>{
+router.get("/allmembers", verifyAdmin, async (req,res)=>{
     try{
         const users = await User.find({}).populate("activeTransactions").populate("prevTransactions").sort({_id:-1})
-        res.status(200).json(users)
+        const sanitizedUsers = users.map(user => {
+            const { password, updatedAt, ...other } = user._doc;
+            return other;
+        });
+        res.status(200).json(sanitizedUsers)
     }
     catch(err){
         return res.status(500).json(err);

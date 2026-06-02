@@ -3,22 +3,22 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema({
     userType: {
         type: String,
-        require: true
+        required: true
     },
     userFullName: {
         type: String,
-        require: true,
+        required: true,
         unique: true
     },
     admissionId: {
         type: String,
-        min: 3,
-        max: 15,
+        minlength: 3,
+        maxlength: 15,
     },
     employeeId: {
         type: String,
-        min: 3,
-        max: 15,
+        minlength: 3,
+        maxlength: 15,
     },
     age: {
         type: Number
@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
     },
     mobileNumber: {
         type: Number,
-        require: true
+        required: true
     },
     photo: {
         type: String,
@@ -43,14 +43,14 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        require: true,
-        max: 50,
+        required: true,
+        maxlength: 50,
         unique: true
     },
     password: {
         type: String,
-        require: true,
-        min: 6
+        required: true,
+        minlength: 6
     },
     points: {
         type: Number,
